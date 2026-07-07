@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getCurrentTenantUser } from "@/modules/tenancy/auth";
 import { listTenantMembers } from "@/modules/tenancy/tenancy.service";
 import { scopeToTenant } from "@/modules/tenancy/scoped-client";
@@ -27,8 +28,12 @@ export default async function DashboardPage() {
       </div>
 
       <p className="text-sm text-zinc-500">
-        Lead management, AI drafting, and conversation assistance arrive in
-        upcoming sprints — see MVP_BACKLOG.md.
+        Head to{" "}
+        <Link href="/leads" className="underline">
+          Leads
+        </Link>{" "}
+        to manage your prospects. AI drafting and conversation assistance
+        arrive in upcoming sprints — see MVP_BACKLOG.md.
       </p>
     </div>
   );

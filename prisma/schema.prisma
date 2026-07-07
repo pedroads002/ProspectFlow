@@ -1,6 +1,6 @@
 // Prisma schema for ProspectFlow.
 // Entity design source of truth: ../DATA_MODEL.md — keep this file in sync with it.
-// Sprint 0 scope only: Tenant, User, CommercialProfile (see MVP_BACKLOG.md).
+// Sprint 0: Tenant, User, CommercialProfile. Sprint 1 adds Lead (see MVP_BACKLOG.md).
 
 generator client {
   provider = "prisma-client"
@@ -19,11 +19,38 @@ enum Role {
   MEMBER
 }
 
+enum LeadStatus {
+  NEW
+  CONTACTED
+  REPLIED
+  QUALIFIED
+  PROPOSAL_SENT
+  NEGOTIATION
+  SALE_COMPLETED
+  LOST
+}
+
+enum Momentum {
+  RISING
+  STEADY
+  COOLING
+  STALLED
+}
+
+enum LeadSourceType {
+  MANUAL
+  INSTAGRAM
+  GOOGLE_MAPS
+  DIRECTORY
+  API
+}
+
 model Tenant {
   id                String             @id @default(uuid())
   name              String
   users             User[]
   commercialProfile CommercialProfile?
+  leads             Lead[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 }
@@ -50,4 +77,27 @@ model CommercialProfile {
   servicesOffered  String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+model Lead {
+  id             String         @id @default(uuid())
+  tenantId       String
+  tenant         Tenant         @relation(fields: [tenantId], references: [id])
+  name           String
+  instagram      String?
+  whatsapp       String?
+  niche          String
+  notes          String?
+  status         LeadStatus     @default(NEW)
+  momentum       Momentum       @default(STEADY)
+  sourceType     LeadSourceType @default(MANUAL)
+  lastActivityAt DateTime       @default(now())
+  deletedAt      DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, momentum])
+  @@index([lastActivityAt])
 }
