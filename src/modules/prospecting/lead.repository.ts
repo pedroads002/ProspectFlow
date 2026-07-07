@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import type { LeadSourceType } from "@/generated/prisma/enums";
+import type { LeadSourceType, LeadStatus, Momentum } from "@/generated/prisma/enums";
 import type { TenantScope } from "@/modules/tenancy/types";
 import type { LeadFieldsInput } from "./lead.schema";
 import type { LeadFilters } from "./types";
@@ -64,4 +64,21 @@ export async function softDeleteLead(scope: TenantScope, id: string) {
   if (!existing) return null;
 
   return db.lead.update({ where: { id }, data: { deletedAt: new Date() } });
+}
+
+/**
+ * Narrow write used by the Outreach module (ARCHITECTURE.md §2) to apply
+ * status transitions and Momentum recomputation — Prospecting keeps sole
+ * ownership of writes to the `Lead` table (no other module calls `db.lead.*`
+ * directly), while Outreach owns the *decision* of what the new values are.
+ */
+export async function updateLeadState(
+  scope: TenantScope,
+  id: string,
+  data: Partial<{ status: LeadStatus; momentum: Momentum; lastActivityAt: Date }>,
+) {
+  const existing = await getLead(scope, id);
+  if (!existing) return null;
+
+  return db.lead.update({ where: { id }, data });
 }

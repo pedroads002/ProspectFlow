@@ -1,6 +1,7 @@
 // Prisma schema for ProspectFlow.
 // Entity design source of truth: ../DATA_MODEL.md — keep this file in sync with it.
-// Sprint 0: Tenant, User, CommercialProfile. Sprint 1 adds Lead (see MVP_BACKLOG.md).
+// Sprint 0: Tenant, User, CommercialProfile. Sprint 1: Lead. Sprint 2 adds
+// LeadEvent + OutboundMessage (see MVP_BACKLOG.md).
 
 generator client {
   provider = "prisma-client"
@@ -43,6 +44,31 @@ enum LeadSourceType {
   GOOGLE_MAPS
   DIRECTORY
   API
+}
+
+enum LeadEventType {
+  STATUS_CHANGED
+  NO_REPLY_LOGGED
+  FOLLOW_UP_LOGGED
+  MESSAGE_SENT
+  CONVERSATION_PASTED
+  AI_ASSISTANCE_REQUESTED
+}
+
+enum MessageKind {
+  FIRST_CONTACT
+  FOLLOW_UP
+  PROPOSAL
+}
+
+enum Channel {
+  WHATSAPP
+  INSTAGRAM
+}
+
+enum MessageStatus {
+  DRAFT
+  SENT
 }
 
 model Tenant {
@@ -96,8 +122,43 @@ model Lead {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
+  events   LeadEvent[]
+  messages OutboundMessage[]
+
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, momentum])
   @@index([lastActivityAt])
+}
+
+model LeadEvent {
+  id         String        @id @default(uuid())
+  leadId     String
+  lead       Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tenantId   String
+  type       LeadEventType
+  fromStatus LeadStatus?
+  toStatus   LeadStatus?
+  createdAt  DateTime      @default(now())
+
+  @@index([leadId, createdAt])
+  @@index([tenantId])
+}
+
+model OutboundMessage {
+  id          String        @id @default(uuid())
+  leadId      String
+  lead        Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tenantId    String
+  kind        MessageKind
+  channel     Channel
+  content     String
+  aiGenerated Boolean       @default(true)
+  status      MessageStatus @default(DRAFT)
+  sentAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([leadId, kind])
+  @@index([tenantId, status])
 }

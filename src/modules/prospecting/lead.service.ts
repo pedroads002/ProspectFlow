@@ -42,3 +42,5 @@ export async function updateLead(
 export function deleteLead(scope: TenantScope, id: string) {
   return leadRepository.softDeleteLead(scope, id);
 }
+
+export const updateLeadState = leadRepository.updateLeadState;

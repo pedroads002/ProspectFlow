@@ -6,6 +6,10 @@ import { revalidatePath } from "next/cache";
 import { getCurrentTenantUser } from "@/modules/tenancy/auth";
 import { scopeToTenant } from "@/modules/tenancy/scoped-client";
 import * as leadService from "@/modules/prospecting/lead.service";
+import { applyQuickAction } from "@/modules/outreach/status.service";
+import type { QuickAction } from "@/modules/outreach/types";
+import * as messageService from "@/modules/outreach/message.service";
+import type { Channel } from "@/generated/prisma/enums";
 
 export type LeadFormState = { error: string } | undefined;
 
@@ -86,4 +90,113 @@ export async function deleteLeadAction(id: string) {
 
   revalidatePath("/leads");
   redirect("/leads");
+}
+
+/**
+ * Applies a Quick Action (PRD §1.2). The UI only ever renders buttons for
+ * actions valid from the Lead's current status (status.service's
+ * getAvailableQuickActions), so an invalid-transition error here means the
+ * client state was stale — letting it surface as an error is fine for that
+ * rare race rather than building bespoke recovery for it.
+ */
+export async function applyQuickActionAction(id: string, action: QuickAction) {
+  const { tenant } = await getCurrentTenantUser();
+  const scope = scopeToTenant(tenant.id);
+
+  await applyQuickAction(scope, id, action);
+
+  revalidatePath("/leads");
+  revalidatePath(`/leads/${id}`);
+}
+
+export type MessageFormState = { error: string } | undefined;
+
+/**
+ * Drafts a first-contact message if the Lead is still NEW, otherwise a
+ * follow-up (message.service picks based on current status) — PRD FR-2.
+ * AI failures (missing profile, provider error) surface as a form error;
+ * they never throw an unhandled exception into the UI (ARCHITECTURE.md §4.4).
+ */
+export async function requestDraftAction(
+  leadId: string,
+  _prevState: MessageFormState,
+  formData: FormData,
+): Promise<MessageFormState> {
+  const { tenant } = await getCurrentTenantUser();
+  const scope = scopeToTenant(tenant.id);
+
+  const channel = formData.get("channel") as Channel;
+  const lead = await leadService.getLead(scope, leadId);
+  if (!lead) {
+    return { error: "Lead not found." };
+  }
+
+  try {
+    if (lead.status === "NEW") {
+      await messageService.draftFirstContactMessage(scope, leadId, channel);
+    } else {
+      await messageService.draftFollowUpMessage(scope, leadId, channel);
+    }
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "AI assistance is unavailable right now. You can still write a message manually.",
+    };
+  }
+
+  revalidatePath(`/leads/${leadId}`);
+  return undefined;
+}
+
+/**
+ * Creates an empty draft with no AI call at all — the manual fallback that
+ * keeps the core workflow usable when AI drafting fails or is unavailable
+ * (PRD NFR "Reliability", ARCHITECTURE.md §4.4). Offered proactively next to
+ * "Generate Draft", not just as error recovery.
+ */
+export async function createManualDraftAction(
+  leadId: string,
+  _prevState: MessageFormState,
+  formData: FormData,
+): Promise<MessageFormState> {
+  const { tenant } = await getCurrentTenantUser();
+  const scope = scopeToTenant(tenant.id);
+
+  const channel = formData.get("channel") as Channel;
+
+  try {
+    await messageService.createManualDraft(scope, leadId, channel);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Could not create draft.",
+    };
+  }
+
+  revalidatePath(`/leads/${leadId}`);
+  return undefined;
+}
+
+/**
+ * Saves the (possibly user-edited) draft content and marks it sent in one
+ * step — PRD FR-2.4/FR-2.5. For a first-contact message sent while the Lead
+ * is still NEW, this also transitions it to CONTACTED (message.service).
+ */
+export async function markMessageSentAction(
+  messageId: string,
+  leadId: string,
+  formData: FormData,
+) {
+  const { tenant } = await getCurrentTenantUser();
+  const scope = scopeToTenant(tenant.id);
+
+  const content = formData.get("content");
+  if (typeof content === "string" && content.trim()) {
+    await messageService.updateDraftContent(scope, messageId, content);
+  }
+  await messageService.markMessageAsSent(scope, messageId);
+
+  revalidatePath("/leads");
+  revalidatePath(`/leads/${leadId}`);
 }
