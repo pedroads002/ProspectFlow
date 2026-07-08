@@ -6,7 +6,7 @@ import * as aiService from "@/modules/ai/ai.service";
 import * as messageRepository from "./message.repository";
 import * as leadEventRepository from "./lead-event.repository";
 import * as momentumService from "./momentum.service";
-import type { Channel } from "@/generated/prisma/enums";
+import type { Channel, LeadStatus, MessageKind } from "@/generated/prisma/enums";
 
 /** Gathers the personalization inputs PRD FR-2.2 requires: Lead public info + Commercial Profile. */
 async function buildDraftContext(
@@ -56,7 +56,7 @@ export async function draftFirstContactMessage(
 
   let content: string;
   try {
-    ({ content } = await aiService.draftFirstContactMessage(context));
+    ({ content } = await aiService.draftFirstContactMessage(scope, leadId, context));
   } catch {
     throw new Error(AI_UNAVAILABLE_MESSAGE);
   }
@@ -80,7 +80,7 @@ export async function draftFollowUpMessage(
 
   let content: string;
   try {
-    ({ content } = await aiService.draftFollowUpMessage(context));
+    ({ content } = await aiService.draftFollowUpMessage(scope, leadId, context));
   } catch {
     throw new Error(AI_UNAVAILABLE_MESSAGE);
   }
@@ -131,12 +131,47 @@ export function listMessagesForLead(scope: TenantScope, leadId: string) {
 }
 
 /**
+ * Generic creation for callers that generate `OutboundMessage` content
+ * themselves — currently the Proposals module (ARCHITECTURE.md §2's design
+ * note: a Proposal is an `OutboundMessage` with `kind = PROPOSAL`, not a
+ * separate table). Outreach still owns the write; the caller owns the content.
+ */
+export function createDraftMessageRecord(
+  scope: TenantScope,
+  data: {
+    leadId: string;
+    kind: MessageKind;
+    channel: Channel;
+    content: string;
+    aiGenerated: boolean;
+  },
+) {
+  return messageRepository.createDraftMessage(scope, data);
+}
+
+/** The status transition a sent message of this kind causes, if any (PRD §7.1) — guarded
+ * on the Lead's current status so re-sending a stray draft can never regress a Lead that
+ * has already moved forward. */
+function transitionForSentMessage(
+  kind: MessageKind,
+  currentStatus: LeadStatus,
+): LeadStatus | undefined {
+  if (kind === "FIRST_CONTACT" && currentStatus === "NEW") return "CONTACTED";
+  if (
+    kind === "PROPOSAL" &&
+    (currentStatus === "QUALIFIED" || currentStatus === "NEGOTIATION")
+  ) {
+    return "PROPOSAL_SENT";
+  }
+  return undefined;
+}
+
+/**
  * Marking a message sent is the explicit, deliberate action distinct from
- * drafting (PRD business rule #3 — a draft is never auto-submitted). For a
- * FIRST_CONTACT message sent while the Lead is still NEW, this is also what
- * transitions it to CONTACTED (PRD §7.1) — guarded on the Lead's current
- * status so re-sending a stray draft can never regress a Lead that has
- * already moved forward.
+ * drafting (PRD business rule #3 — a draft is never auto-submitted). Depending
+ * on the message kind and the Lead's current status, this may also transition
+ * it: FIRST_CONTACT sent while NEW → CONTACTED; PROPOSAL sent while
+ * QUALIFIED/NEGOTIATION → PROPOSAL_SENT (PRD §7.1).
  */
 export async function markMessageAsSent(scope: TenantScope, messageId: string) {
   const message = await messageRepository.getMessage(scope, messageId);
@@ -146,19 +181,18 @@ export async function markMessageAsSent(scope: TenantScope, messageId: string) {
   if (!sent) return null;
 
   const lead = await prospectingService.getLead(scope, message.leadId);
-  const shouldTransitionToContacted =
-    message.kind === "FIRST_CONTACT" && lead?.status === "NEW";
+  const toStatus = lead
+    ? transitionForSentMessage(message.kind, lead.status)
+    : undefined;
 
   await leadEventRepository.logEvent(scope, {
     leadId: message.leadId,
     type: "MESSAGE_SENT",
-    ...(shouldTransitionToContacted
-      ? { fromStatus: "NEW" as const, toStatus: "CONTACTED" as const }
-      : {}),
+    ...(toStatus ? { fromStatus: lead!.status, toStatus } : {}),
   });
 
   const updatedLead = await prospectingService.updateLeadState(scope, message.leadId, {
-    ...(shouldTransitionToContacted ? { status: "CONTACTED" as const } : {}),
+    ...(toStatus ? { status: toStatus } : {}),
     lastActivityAt: new Date(),
   });
   if (updatedLead) {

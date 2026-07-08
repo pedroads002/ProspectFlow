@@ -1,7 +1,7 @@
 // Prisma schema for ProspectFlow.
 // Entity design source of truth: ../DATA_MODEL.md — keep this file in sync with it.
-// Sprint 0: Tenant, User, CommercialProfile. Sprint 1: Lead. Sprint 2 adds
-// LeadEvent + OutboundMessage (see MVP_BACKLOG.md).
+// Sprint 0: Tenant, User, CommercialProfile. Sprint 1: Lead. Sprint 2: LeadEvent +
+// OutboundMessage. Sprint 3 adds ConversationEntry + AIInteraction (see MVP_BACKLOG.md).
 
 generator client {
   provider = "prisma-client"
@@ -71,6 +71,15 @@ enum MessageStatus {
   SENT
 }
 
+enum AITaskType {
+  DRAFT_FIRST_CONTACT
+  DRAFT_FOLLOW_UP
+  SUMMARIZE
+  SENTIMENT
+  NEXT_ACTION
+  PROPOSAL_DRAFT
+}
+
 model Tenant {
   id                String             @id @default(uuid())
   name              String
@@ -122,8 +131,10 @@ model Lead {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  events   LeadEvent[]
-  messages OutboundMessage[]
+  events         LeadEvent[]
+  messages       OutboundMessage[]
+  conversations  ConversationEntry[]
+  aiInteractions AIInteraction[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -161,4 +172,31 @@ model OutboundMessage {
 
   @@index([leadId, kind])
   @@index([tenantId, status])
+}
+
+model ConversationEntry {
+  id        String   @id @default(uuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tenantId  String
+  rawText   String
+  pastedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([leadId, pastedAt])
+}
+
+model AIInteraction {
+  id            String     @id @default(uuid())
+  leadId        String
+  lead          Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tenantId      String
+  taskType      AITaskType
+  provider      String
+  model         String
+  inputSnapshot String
+  outputContent String
+  createdAt     DateTime   @default(now())
+
+  @@index([leadId, taskType, createdAt])
 }

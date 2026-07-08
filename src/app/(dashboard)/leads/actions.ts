@@ -9,7 +9,10 @@ import * as leadService from "@/modules/prospecting/lead.service";
 import { applyQuickAction } from "@/modules/outreach/status.service";
 import type { QuickAction } from "@/modules/outreach/types";
 import * as messageService from "@/modules/outreach/message.service";
+import * as conversationService from "@/modules/outreach/conversation.service";
+import * as proposalService from "@/modules/proposals/proposal.service";
 import type { Channel } from "@/generated/prisma/enums";
+import type { ConversationAnalysisResult } from "@/modules/ai/ai.service";
 
 export type LeadFormState = { error: string } | undefined;
 
@@ -199,4 +202,94 @@ export async function markMessageSentAction(
 
   revalidatePath("/leads");
   revalidatePath(`/leads/${leadId}`);
+}
+
+export type PasteConversationFormState = { error: string } | undefined;
+
+/** PRD FR-4.1: paste raw conversation text against a Lead at any time. */
+export async function pasteConversationAction(
+  leadId: string,
+  _prevState: PasteConversationFormState,
+  formData: FormData,
+): Promise<PasteConversationFormState> {
+  const { tenant } = await getCurrentTenantUser();
+  const scope = scopeToTenant(tenant.id);
+
+  const rawText = formData.get("rawText");
+  if (typeof rawText !== "string") {
+    return { error: "Paste some conversation text first." };
+  }
+
+  try {
+    await conversationService.pasteConversation(scope, leadId, rawText);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Could not save conversation.",
+    };
+  }
+
+  revalidatePath(`/leads/${leadId}`);
+  return undefined;
+}
+
+/**
+ * PRD FR-5.1: an AI-drafted, plain-text proposal from the full Lead +
+ * conversation context. Reuses the same MessageFormState/markMessageSentAction
+ * lifecycle as any other OutboundMessage — a proposal is one, just with a
+ * different kind (DECISIONS.md's Proposals module note).
+ */
+export async function requestProposalDraftAction(
+  leadId: string,
+  _prevState: MessageFormState,
+  formData: FormData,
+): Promise<MessageFormState> {
+  const { tenant } = await getCurrentTenantUser();
+  const scope = scopeToTenant(tenant.id);
+
+  const channel = formData.get("channel") as Channel;
+
+  try {
+    await proposalService.draftProposal(scope, leadId, channel);
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "AI assistance is unavailable right now. You can still write a proposal manually.",
+    };
+  }
+
+  revalidatePath(`/leads/${leadId}`);
+  return undefined;
+}
+
+export type AnalysisFormState =
+  | { error: string }
+  | { result: ConversationAnalysisResult }
+  | undefined;
+
+/**
+ * PRD FR-4.2-4.4: one combined, modular AI assistance call. Failures surface
+ * as a form error rather than an unhandled exception (ARCHITECTURE.md §4.4).
+ */
+export async function analyzeConversationAction(
+  leadId: string,
+  // Required by useActionState's (state, formData) signature; this action needs neither.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _prevState: AnalysisFormState,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _formData: FormData,
+): Promise<AnalysisFormState> {
+  const { tenant } = await getCurrentTenantUser();
+  const scope = scopeToTenant(tenant.id);
+
+  try {
+    const result = await conversationService.analyzeConversation(scope, leadId);
+    revalidatePath(`/leads/${leadId}`);
+    return { result };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "AI assistance is unavailable right now.",
+    };
+  }
 }
