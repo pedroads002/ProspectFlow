@@ -1,17 +1,20 @@
 "use client";
 
 import { useTransition } from "react";
+import { Zap } from "lucide-react";
 import { applyQuickActionAction } from "../actions";
 import type { QuickAction } from "@/modules/outreach/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const LABELS: Record<QuickAction, string> = {
-  NO_REPLY: "No Reply",
-  REPLIED: "Replied",
-  INTERESTED: "Interested",
+  NO_REPLY: "Sem Resposta",
+  REPLIED: "Respondeu",
+  INTERESTED: "Interessado",
   FOLLOW_UP: "Follow-up",
-  MEETING_SCHEDULED: "Meeting Scheduled",
-  SALE_COMPLETED: "Sale Completed",
-  LOST: "Lost",
+  MEETING_SCHEDULED: "Reunião Agendada",
+  SALE_COMPLETED: "Venda Concluída",
+  LOST: "Perdido",
 };
 
 export function QuickActionButtons({
@@ -26,22 +29,31 @@ export function QuickActionButtons({
   if (actions.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {actions.map((action) => (
-        <button
-          key={action}
-          type="button"
-          disabled={isPending}
-          onClick={() =>
-            startTransition(() => {
-              applyQuickActionAction(leadId, action);
-            })
-          }
-          className="rounded border border-zinc-300 px-3 py-1.5 text-sm disabled:opacity-50 dark:border-zinc-700"
-        >
-          {LABELS[action]}
-        </button>
-      ))}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Zap className="size-4 text-muted-foreground" />
+          Ações Rápidas
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-wrap gap-2">
+        {actions.map((action) => (
+          <Button
+            key={action}
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isPending}
+            onClick={() =>
+              startTransition(() => {
+                applyQuickActionAction(leadId, action);
+              })
+            }
+          >
+            {LABELS[action]}
+          </Button>
+        ))}
+      </CardContent>
+    </Card>
   );
 }

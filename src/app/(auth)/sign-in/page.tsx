@@ -2,57 +2,77 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { Mail, Lock } from "lucide-react";
 import { signIn } from "../actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 
 export default function SignInPage() {
   const [state, action, pending] = useActionState(signIn, undefined);
 
   return (
-    <form action={action} className="flex w-full max-w-sm flex-col gap-4">
-      <h1 className="text-xl font-semibold">Sign in to ProspectFlow</h1>
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle>Entrar</CardTitle>
+        <CardDescription>Bem-vindo de volta ao ProspectFlow.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form action={action} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="email">E-mail</Label>
+            <div className="relative">
+              <Mail className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                required
+                className="pl-8"
+              />
+            </div>
+          </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm">
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-        />
-      </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="password">Senha</Label>
+            <div className="relative">
+              <Lock className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                className="pl-8"
+              />
+            </div>
+          </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm">
-          Password
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-        />
-      </div>
+          {state?.error && (
+            <p className="text-sm text-destructive">{state.error}</p>
+          )}
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+          <Button type="submit" disabled={pending} className="w-full">
+            {pending ? "Entrando..." : "Entrar"}
+          </Button>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded bg-zinc-900 py-2 text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
-      >
-        {pending ? "Signing in..." : "Sign in"}
-      </button>
-
-      <p className="text-center text-sm text-zinc-500">
-        No account?{" "}
-        <Link href="/sign-up" className="underline">
-          Sign up
-        </Link>
-      </p>
-    </form>
+          <p className="text-center text-sm text-muted-foreground">
+            Ainda não tem conta?{" "}
+            <Link
+              href="/sign-up"
+              className="text-primary-strong underline-offset-4 hover:underline"
+            >
+              Cadastre-se
+            </Link>
+          </p>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

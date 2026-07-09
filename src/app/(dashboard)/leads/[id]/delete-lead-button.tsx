@@ -2,39 +2,39 @@
 
 import { useState } from "react";
 import { deleteLeadAction } from "../actions";
+import { Button } from "@/components/ui/button";
 
 export function DeleteLeadButton({ leadId }: { leadId: string }) {
   const [confirming, setConfirming] = useState(false);
 
   if (!confirming) {
     return (
-      <button
+      <Button
         type="button"
+        variant="destructive"
+        size="sm"
         onClick={() => setConfirming(true)}
-        className="text-sm text-red-600 underline"
       >
-        Delete lead
-      </button>
+        Excluir lead
+      </Button>
     );
   }
 
   return (
-    <div className="flex items-center gap-3 text-sm">
-      <span className="text-zinc-500">
-        Delete this lead? This cannot be undone.
-      </span>
+    <div className="flex items-center gap-2">
       <form action={deleteLeadAction.bind(null, leadId)}>
-        <button type="submit" className="text-red-600 underline">
-          Confirm delete
-        </button>
+        <Button type="submit" variant="destructive" size="sm">
+          Confirmar exclusão
+        </Button>
       </form>
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={() => setConfirming(false)}
-        className="underline"
       >
-        Cancel
-      </button>
+        Cancelar
+      </Button>
     </div>
   );
 }

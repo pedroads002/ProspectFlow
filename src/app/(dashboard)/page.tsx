@@ -1,7 +1,18 @@
 import Link from "next/link";
+import { ArrowRight, Users } from "lucide-react";
 import { getCurrentTenantUser } from "@/modules/tenancy/auth";
 import { listTenantMembers } from "@/modules/tenancy/tenancy.service";
 import { scopeToTenant } from "@/modules/tenancy/scoped-client";
+import { Button } from "@/components/ui/button";
+import { ROLE_LABELS } from "@/lib/domain-labels";
+import { PageHeader } from "@/components/page-header";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 
 export default async function DashboardPage() {
   const { tenant, user } = await getCurrentTenantUser();
@@ -9,32 +20,51 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Welcome, {user.email}</h1>
-        <p className="text-zinc-500">Workspace: {tenant.name}</p>
-      </div>
+      <PageHeader
+        title={`Bem-vindo, ${user.email}`}
+        description={`Espaço de trabalho: ${tenant.name}`}
+        actions={
+          <Button
+            nativeButton={false}
+            render={
+              <Link href="/leads">
+                Ir para Leads
+                <ArrowRight />
+              </Link>
+            }
+          />
+        }
+      />
 
-      <div>
-        <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
-          Team
-        </h2>
-        <ul className="mt-2 divide-y divide-zinc-200 dark:divide-zinc-800">
-          {members.map((member) => (
-            <li key={member.id} className="py-2 text-sm">
-              {member.email} <span className="text-zinc-500">· {member.role}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <p className="text-sm text-zinc-500">
-        Head to{" "}
-        <Link href="/leads" className="underline">
-          Leads
-        </Link>{" "}
-        to manage your prospects. AI drafting and conversation assistance
-        arrive in upcoming sprints — see MVP_BACKLOG.md.
-      </p>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="size-4 text-muted-foreground" />
+            Equipe
+          </CardTitle>
+          <CardDescription>
+            Todos com acesso a este espaço de trabalho.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="divide-y">
+            {members.map((member) => (
+              <li
+                key={member.id}
+                className="flex items-center gap-3 py-2.5 text-sm"
+              >
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
+                  {member.email.charAt(0).toUpperCase()}
+                </div>
+                <span className="flex-1 truncate">{member.email}</span>
+                <span className="text-muted-foreground">
+                  {ROLE_LABELS[member.role]}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }
