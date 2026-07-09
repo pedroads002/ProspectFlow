@@ -25,7 +25,7 @@ export async function saveCommercialProfileAction(
     await upsertCommercialProfile(scope, data);
   } catch (error) {
     if (error instanceof ZodError) {
-      return { error: error.issues[0]?.message ?? "Invalid input." };
+      return { error: error.issues[0]?.message ?? "Dados inválidos." };
     }
     throw error;
   }

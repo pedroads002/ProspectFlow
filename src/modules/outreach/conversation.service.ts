@@ -14,12 +14,12 @@ export async function pasteConversation(
 ) {
   const trimmed = rawText.trim();
   if (!trimmed) {
-    throw new Error("Paste some conversation text first.");
+    throw new Error("Cole o texto da conversa primeiro.");
   }
 
   const lead = await prospectingService.getLead(scope, leadId);
   if (!lead) {
-    throw new Error("Lead not found.");
+    throw new Error("Lead não encontrado.");
   }
 
   const entry = await conversationEntryRepository.createEntry(scope, leadId, trimmed);
@@ -33,7 +33,7 @@ export function listConversationForLead(scope: TenantScope, leadId: string) {
   return conversationEntryRepository.listEntriesForLead(scope, leadId);
 }
 
-const AI_UNAVAILABLE_MESSAGE = "AI assistance is unavailable right now.";
+const AI_UNAVAILABLE_MESSAGE = "A assistência de IA está indisponível no momento.";
 
 /**
  * Gathers every pasted entry for continuity (PRD FR-2.2(d)), calls the AI
@@ -43,19 +43,19 @@ const AI_UNAVAILABLE_MESSAGE = "AI assistance is unavailable right now.";
 export async function analyzeConversation(scope: TenantScope, leadId: string) {
   const lead = await prospectingService.getLead(scope, leadId);
   if (!lead) {
-    throw new Error("Lead not found.");
+    throw new Error("Lead não encontrado.");
   }
 
   const profile = await tenancyService.getCommercialProfile(scope);
   if (!profile) {
     throw new Error(
-      "Set up your Commercial Profile in Settings before requesting AI assistance.",
+      "Configure seu Perfil Comercial em Configurações antes de solicitar assistência de IA.",
     );
   }
 
   const entries = await conversationEntryRepository.listEntriesForLead(scope, leadId);
   if (entries.length === 0) {
-    throw new Error("Paste a conversation first.");
+    throw new Error("Cole uma conversa primeiro.");
   }
 
   const conversationText = entries.map((entry) => entry.rawText).join("\n---\n");

@@ -16,13 +16,13 @@ async function buildDraftContext(
 ) {
   const lead = await prospectingService.getLead(scope, leadId);
   if (!lead) {
-    throw new Error("Lead not found.");
+    throw new Error("Lead não encontrado.");
   }
 
   const profile = await tenancyService.getCommercialProfile(scope);
   if (!profile) {
     throw new Error(
-      "Set up your Commercial Profile in Settings before drafting messages.",
+      "Configure seu Perfil Comercial em Configurações antes de gerar mensagens.",
     );
   }
 
@@ -45,7 +45,7 @@ async function buildDraftContext(
  * are actionable and specific, unlike a raw provider error.
  */
 const AI_UNAVAILABLE_MESSAGE =
-  "AI assistance is unavailable right now. You can still write a message manually.";
+  "A assistência de IA está indisponível no momento. Você ainda pode escrever a mensagem manualmente.";
 
 export async function draftFirstContactMessage(
   scope: TenantScope,
@@ -106,7 +106,7 @@ export async function createManualDraft(
 ) {
   const lead = await prospectingService.getLead(scope, leadId);
   if (!lead) {
-    throw new Error("Lead not found.");
+    throw new Error("Lead não encontrado.");
   }
 
   return messageRepository.createDraftMessage(scope, {

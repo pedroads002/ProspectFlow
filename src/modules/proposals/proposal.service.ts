@@ -8,7 +8,7 @@ import * as aiService from "@/modules/ai/ai.service";
 import type { Channel } from "@/generated/prisma/enums";
 
 const AI_UNAVAILABLE_MESSAGE =
-  "AI assistance is unavailable right now. You can still write a proposal manually.";
+  "A assistência de IA está indisponível no momento. Você ainda pode escrever a proposta manualmente.";
 
 /**
  * PRD FR-5.1: an AI-drafted, plain-text proposal grounded in the full Lead +
@@ -23,13 +23,13 @@ export async function draftProposal(
 ) {
   const lead = await prospectingService.getLead(scope, leadId);
   if (!lead) {
-    throw new Error("Lead not found.");
+    throw new Error("Lead não encontrado.");
   }
 
   const profile = await tenancyService.getCommercialProfile(scope);
   if (!profile) {
     throw new Error(
-      "Set up your Commercial Profile in Settings before drafting a proposal.",
+      "Configure seu Perfil Comercial em Configurações antes de gerar uma proposta.",
     );
   }
 

@@ -4,10 +4,10 @@ import { z } from "zod";
 export const commercialProfileSchema = z.object({
   valueProposition: z
     .string()
-    .min(1, { error: "Describe what you sell and your expertise." }),
+    .min(1, { error: "Descreva o que você vende e sua especialidade." }),
   toneDescription: z
     .string()
-    .min(1, { error: "Describe your preferred communication tone." }),
+    .min(1, { error: "Descreva seu tom de comunicação preferido." }),
   servicesOffered: z
     .string()
     .optional()
