@@ -83,9 +83,10 @@ later.
 | `id` | uuid (PK) | yes | |
 | `tenantId` | uuid (FK → Tenant) | yes | |
 | `name` | text | yes | Business or professional name |
-| `instagram` | text | no | Public handle/URL |
+| `instagram` | text | no | Public handle, stored normalized (no `@`, no full URL) regardless of how the user typed it |
+| `followerCount` | integer | no | Manually entered Instagram follower count — a qualification signal in the Instagram-DM prospecting flow (WORKFLOW.md), and future input for AI-assisted lead analysis |
 | `whatsapp` | text | no | Public number |
-| `niche` | text | yes | e.g. "Dental Clinic" (free text in MVP) |
+| `niche` | text | yes | e.g. "Dental Clinic" (free text in MVP). Labeled "Especialidade" in the UI — display label only, same field/values |
 | `notes` | text | no | Freeform |
 | `status` | enum `LeadStatus` | yes | Default `NEW`. See PRD §1.1 for values. |
 | `momentum` | enum `Momentum` | yes | Default `STEADY`. Cached/derived — recalculated on read and on every write to `lastActivityAt`. |
@@ -97,8 +98,9 @@ later.
 Indexes: `tenantId`; composite `(tenantId, status)`; composite `(tenantId, momentum)`; `lastActivityAt` — these support the Lead list's primary filter/sort needs (PRD §1.4, FR-1.4).
 
 Application-level validation (not a DB constraint, to keep the schema forgiving of future sources
-that might not have either): at least one of `instagram` or `whatsapp` should be present before a
-first-contact message can be drafted.
+that might not have either): at least one of `instagram` or `whatsapp` must be present. Enforced by
+`leadFieldsSchema` at creation and edit time (not deferred until first-contact drafting), so the
+gap is caught at data-entry, the actual system boundary for this data (CLAUDE.md).
 
 ### 3.5 `LeadEvent`
 
@@ -300,6 +302,7 @@ model Lead {
   tenant          Tenant              @relation(fields: [tenantId], references: [id])
   name            String
   instagram       String?
+  followerCount   Int?
   whatsapp        String?
   niche           String
   notes           String?

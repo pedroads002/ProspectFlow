@@ -20,6 +20,7 @@ function leadInputFromFormData(formData: FormData) {
   return {
     name: formData.get("name"),
     instagram: formData.get("instagram"),
+    followerCount: formData.get("followerCount"),
     whatsapp: formData.get("whatsapp"),
     niche: formData.get("niche"),
     notes: formData.get("notes"),
@@ -41,7 +42,7 @@ export async function createLeadAction(
     );
   } catch (error) {
     if (error instanceof ZodError) {
-      return { error: error.issues[0]?.message ?? "Invalid input." };
+      return { error: error.issues[0]?.message ?? "Dados inválidos." };
     }
     throw error;
   }
@@ -65,11 +66,11 @@ export async function updateLeadAction(
       leadInputFromFormData(formData),
     );
     if (!updated) {
-      return { error: "Lead not found." };
+      return { error: "Lead não encontrado." };
     }
   } catch (error) {
     if (error instanceof ZodError) {
-      return { error: error.issues[0]?.message ?? "Invalid input." };
+      return { error: error.issues[0]?.message ?? "Dados inválidos." };
     }
     throw error;
   }
@@ -131,7 +132,7 @@ export async function requestDraftAction(
   const channel = formData.get("channel") as Channel;
   const lead = await leadService.getLead(scope, leadId);
   if (!lead) {
-    return { error: "Lead not found." };
+    return { error: "Lead não encontrado." };
   }
 
   try {
@@ -145,7 +146,7 @@ export async function requestDraftAction(
       error:
         error instanceof Error
           ? error.message
-          : "AI assistance is unavailable right now. You can still write a message manually.",
+          : "A assistência de IA está indisponível no momento. Você ainda pode escrever a mensagem manualmente.",
     };
   }
 
@@ -173,7 +174,7 @@ export async function createManualDraftAction(
     await messageService.createManualDraft(scope, leadId, channel);
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : "Could not create draft.",
+      error: error instanceof Error ? error.message : "Não foi possível criar o rascunho.",
     };
   }
 
@@ -217,14 +218,14 @@ export async function pasteConversationAction(
 
   const rawText = formData.get("rawText");
   if (typeof rawText !== "string") {
-    return { error: "Paste some conversation text first." };
+    return { error: "Cole o texto da conversa primeiro." };
   }
 
   try {
     await conversationService.pasteConversation(scope, leadId, rawText);
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : "Could not save conversation.",
+      error: error instanceof Error ? error.message : "Não foi possível salvar a conversa.",
     };
   }
 
@@ -255,7 +256,7 @@ export async function requestProposalDraftAction(
       error:
         error instanceof Error
           ? error.message
-          : "AI assistance is unavailable right now. You can still write a proposal manually.",
+          : "A assistência de IA está indisponível no momento. Você ainda pode escrever a proposta manualmente.",
     };
   }
 
@@ -289,7 +290,7 @@ export async function analyzeConversationAction(
     return { result };
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : "AI assistance is unavailable right now.",
+      error: error instanceof Error ? error.message : "A assistência de IA está indisponível no momento.",
     };
   }
 }

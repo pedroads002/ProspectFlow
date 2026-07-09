@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Plus, Search, UserPlus } from "lucide-react";
 import { getCurrentTenantUser } from "@/modules/tenancy/auth";
 import { scopeToTenant } from "@/modules/tenancy/scoped-client";
 import { listLeads } from "@/modules/prospecting/lead.service";
@@ -7,9 +8,28 @@ import {
   sortByMomentumPriority,
 } from "@/modules/outreach/momentum.service";
 import { LeadStatus, Momentum } from "@/generated/prisma/enums";
+import { STATUS_LABELS, MOMENTUM_LABELS } from "@/lib/domain-labels";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { MomentumBadge } from "@/components/momentum-badge";
+import { StatusBadge } from "@/components/status-badge";
+import { PageHeader } from "@/components/page-header";
+import { EmptyState } from "@/components/empty-state";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 
 const STATUS_OPTIONS = Object.values(LeadStatus);
 const MOMENTUM_OPTIONS = Object.values(Momentum);
+
+const SELECT_CLASS =
+  "h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
 function isLeadStatus(value: string | undefined): value is LeadStatus {
   return !!value && (STATUS_OPTIONS as string[]).includes(value);
@@ -50,94 +70,142 @@ export default async function LeadsPage({
     : freshLeads;
   const leads = sortByMomentumPriority(filteredLeads);
 
+  const hasActiveFilters = Boolean(
+    params.search || params.niche || params.status || params.momentum,
+  );
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Leads</h1>
-        <Link
-          href="/leads/new"
-          className="rounded bg-zinc-900 px-4 py-2 text-sm text-white dark:bg-zinc-50 dark:text-zinc-900"
-        >
-          Add Lead
-        </Link>
-      </div>
+      <PageHeader
+        title="Leads"
+        description={`${leads.length} prospecto${leads.length === 1 ? "" : "s"}`}
+        actions={
+          <Button
+            nativeButton={false}
+            render={
+              <Link href="/leads/new">
+                <Plus />
+                Adicionar Lead
+              </Link>
+            }
+          />
+        }
+      />
 
-      <form className="flex flex-wrap gap-3" method="get">
-        <input
-          type="text"
-          name="search"
-          placeholder="Search by name..."
-          defaultValue={params.search}
-          className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-        />
-        <input
-          type="text"
-          name="niche"
-          placeholder="Filter by niche..."
-          defaultValue={params.niche}
-          className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-        />
-        <select
-          name="status"
-          defaultValue={params.status ?? ""}
-          className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-        >
-          <option value="">All statuses</option>
-          {STATUS_OPTIONS.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <select
-          name="momentum"
-          defaultValue={params.momentum ?? ""}
-          className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-        >
-          <option value="">All momentum</option>
-          {MOMENTUM_OPTIONS.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          className="rounded border border-zinc-300 px-4 py-2 text-sm dark:border-zinc-700"
-        >
-          Filter
-        </button>
-      </form>
+      <Card>
+        <CardContent>
+          <form className="flex flex-wrap items-center gap-3" method="get">
+            <div className="relative">
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                name="search"
+                placeholder="Buscar por nome..."
+                defaultValue={params.search}
+                className="h-8 w-48 pl-8"
+              />
+            </div>
+            <Input
+              type="text"
+              name="niche"
+              placeholder="Filtrar por especialidade..."
+              defaultValue={params.niche}
+              className="h-8 w-48"
+            />
+            <select
+              name="status"
+              defaultValue={params.status ?? ""}
+              className={SELECT_CLASS}
+            >
+              <option value="">Todos os status</option>
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {STATUS_LABELS[option]}
+                </option>
+              ))}
+            </select>
+            <select
+              name="momentum"
+              defaultValue={params.momentum ?? ""}
+              className={SELECT_CLASS}
+            >
+              <option value="">Todos os momentum</option>
+              {MOMENTUM_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {MOMENTUM_LABELS[option]}
+                </option>
+              ))}
+            </select>
+            <Button type="submit" variant="outline" size="sm">
+              Filtrar
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
       {leads.length === 0 ? (
-        <p className="text-sm text-zinc-500">
-          No leads yet. Add your first prospect to get started.
-        </p>
+        <EmptyState
+          icon={UserPlus}
+          title={
+            hasActiveFilters
+              ? "Nenhum lead encontrado"
+              : "Nenhum lead ainda"
+          }
+          description={
+            hasActiveFilters
+              ? "Tente ajustar os filtros para ver mais resultados."
+              : "Adicione seu primeiro prospecto para começar a prospectar."
+          }
+          action={
+            !hasActiveFilters && (
+              <Button
+            nativeButton={false}
+            render={
+              <Link href="/leads/new">
+                <Plus />
+                Adicionar Lead
+              </Link>
+            }
+          />
+            )
+          }
+        />
       ) : (
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-zinc-200 text-zinc-500 dark:border-zinc-800">
-            <tr>
-              <th className="py-2 font-medium">Name</th>
-              <th className="py-2 font-medium">Niche</th>
-              <th className="py-2 font-medium">Status</th>
-              <th className="py-2 font-medium">Momentum</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-            {leads.map((lead) => (
-              <tr key={lead.id}>
-                <td className="py-2">
-                  <Link href={`/leads/${lead.id}`} className="underline">
-                    {lead.name}
-                  </Link>
-                </td>
-                <td className="py-2">{lead.niche}</td>
-                <td className="py-2">{lead.status}</td>
-                <td className="py-2">{lead.momentum}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Especialidade</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Momentum</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {leads.map((lead) => (
+                <TableRow key={lead.id}>
+                  <TableCell>
+                    <Link
+                      href={`/leads/${lead.id}`}
+                      className="font-medium text-primary-strong hover:underline"
+                    >
+                      {lead.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {lead.niche}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={lead.status} />
+                  </TableCell>
+                  <TableCell>
+                    <MomentumBadge momentum={lead.momentum} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
       )}
     </div>
   );

@@ -35,7 +35,7 @@ export async function updateLead(
   id: string,
   formInput: unknown,
 ) {
-  const data = leadFieldsSchema.partial().parse(formInput);
+  const data = leadFieldsSchema.parse(formInput);
   return leadRepository.updateLead(scope, id, data);
 }
 

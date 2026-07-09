@@ -120,6 +120,7 @@ model Lead {
   tenant         Tenant         @relation(fields: [tenantId], references: [id])
   name           String
   instagram      String?
+  followerCount  Int?
   whatsapp       String?
   niche          String
   notes          String?
