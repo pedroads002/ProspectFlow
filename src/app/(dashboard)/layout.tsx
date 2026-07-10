@@ -8,7 +8,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { tenant, user } = await getCurrentTenantUser();
+  const { user } = await getCurrentTenantUser();
 
   return (
     <div className="flex min-h-svh">
@@ -20,7 +20,7 @@ export default async function DashboardLayout({
           <SidebarNav />
         </div>
         <div className="border-t p-3">
-          <UserMenu tenantName={tenant.name} email={user.email} />
+          <UserMenu name={user.name} email={user.email} />
         </div>
       </aside>
 

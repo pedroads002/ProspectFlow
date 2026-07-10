@@ -11,10 +11,22 @@ const credentialsSchema = z.object({
     .min(8, { error: "A senha deve ter pelo menos 8 caracteres." }),
 });
 
+const signUpSchema = credentialsSchema.extend({
+  name: z.string().min(1, { error: "Informe seu nome." }),
+});
+
 export type AuthFormState = { error: string } | undefined;
 
 function parseCredentials(formData: FormData) {
   return credentialsSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+}
+
+function parseSignUp(formData: FormData) {
+  return signUpSchema.safeParse({
+    name: formData.get("name"),
     email: formData.get("email"),
     password: formData.get("password"),
   });
@@ -50,13 +62,21 @@ export async function signUp(
   _prevState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const parsed = parseCredentials(formData);
+  const parsed = parseSignUp(formData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp(parsed.data);
+  const { name, email, password } = parsed.data;
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    // Carried in Supabase Auth's own user_metadata and read by
+    // modules/tenancy/auth.ts's ensureTenantAndUser to seed User.name on
+    // first sign-in — no separate profile-capture step needed.
+    options: { data: { full_name: name } },
+  });
   if (error) {
     return { error: translateAuthError(error.message) };
   }

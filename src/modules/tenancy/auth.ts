@@ -29,6 +29,7 @@ export const getAuthenticatedSupabaseUser = cache(async () => {
 async function ensureTenantAndUser(supabaseUser: {
   id: string;
   email?: string;
+  user_metadata?: { full_name?: string };
 }): Promise<AuthenticatedContext> {
   const existing = await db.user.findUnique({
     where: { supabaseUserId: supabaseUser.id },
@@ -40,7 +41,11 @@ async function ensureTenantAndUser(supabaseUser: {
   }
 
   const email = supabaseUser.email ?? "";
-  const tenantName = email ? `${email.split("@")[0]}'s Workspace` : "My Workspace";
+  // Captured at sign-up (see (auth)/actions.ts's signUp) and stored on User.name
+  // — distinct from Tenant.name, which represents the workspace/account, not
+  // the individual person (DATA_MODEL.md §3.2).
+  const fullName = supabaseUser.user_metadata?.full_name?.trim() || undefined;
+  const tenantName = fullName ? `Espaço de ${fullName.split(" ")[0]}` : "Minha Conta";
 
   const tenant = await db.tenant.create({
     data: {
@@ -49,6 +54,7 @@ async function ensureTenantAndUser(supabaseUser: {
         create: {
           supabaseUserId: supabaseUser.id,
           email,
+          name: fullName,
           role: "OWNER",
         },
       },

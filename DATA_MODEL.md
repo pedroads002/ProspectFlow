@@ -55,6 +55,7 @@ Constraints: none beyond `name` being non-empty (application-level validation).
 | `tenantId` | uuid (FK → Tenant) | yes | |
 | `supabaseUserId` | text | yes | Unique. Links to Supabase Auth's user id. |
 | `email` | text | yes | Unique |
+| `name` | text | no | Display name shown throughout the UI (greeting, avatar initials, sidebar, profile) — captured at sign-up (passed through Supabase Auth's `user_metadata.full_name`) and editable later from Settings. Nullable to accommodate accounts created before this field existed; the UI falls back to a generic, non-identifying placeholder when absent — it never displays `email` or a parsed identifier as if it were the name. Deliberately separate from `Tenant.name`, which represents the workspace/account, not the individual person. |
 | `role` | enum: `OWNER`, `MEMBER` | yes | MVP only ever creates `OWNER`; `MEMBER` reserved for future multi-user tenants |
 | `createdAt` / `updatedAt` | timestamp | yes | |
 
@@ -278,6 +279,7 @@ model User {
   tenant          Tenant   @relation(fields: [tenantId], references: [id])
   supabaseUserId  String   @unique
   email           String   @unique
+  name            String?
   role            Role     @default(OWNER)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

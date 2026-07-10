@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, User } from "lucide-react";
 import { signUp } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,20 @@ export default function SignUpPage() {
       </CardHeader>
       <CardContent>
         <form action={action} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="name">Nome</Label>
+            <div className="relative">
+              <User className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                required
+                className="pl-8"
+              />
+            </div>
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email">E-mail</Label>
             <div className="relative">
