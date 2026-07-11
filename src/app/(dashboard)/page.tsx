@@ -1,24 +1,52 @@
 import Link from "next/link";
-import { ArrowRight, Users } from "lucide-react";
+import {
+  ArrowRight,
+  Send,
+  MessageSquarePlus,
+  MessageSquareReply,
+  Repeat2,
+  CalendarClock,
+  UserPlus,
+} from "lucide-react";
 import { getCurrentTenantUser } from "@/modules/tenancy/auth";
-import { listTenantMembers } from "@/modules/tenancy/tenancy.service";
 import { scopeToTenant } from "@/modules/tenancy/scoped-client";
+import { getDailySummary } from "@/modules/outreach/daily-summary.service";
+import { getPriorityLeads } from "@/modules/outreach/momentum.service";
+import { getFirstName } from "@/lib/user-display";
 import { Button } from "@/components/ui/button";
-import { ROLE_LABELS } from "@/lib/domain-labels";
-import { getFirstName, getInitials } from "@/lib/user-display";
 import { PageHeader } from "@/components/page-header";
+import { StatTile } from "@/components/stat-tile";
+import { StatusBadge } from "@/components/status-badge";
+import { MomentumBadge } from "@/components/momentum-badge";
+import { EmptyState } from "@/components/empty-state";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+
+const PRIORITY_QUEUE_LIMIT = 8;
 
 export default async function DashboardPage() {
   const { tenant, user } = await getCurrentTenantUser();
-  const members = await listTenantMembers(scopeToTenant(tenant.id));
+  const scope = scopeToTenant(tenant.id);
   const firstName = getFirstName(user.name);
+
+  const [summary, priorityLeads] = await Promise.all([
+    getDailySummary(scope),
+    getPriorityLeads(scope, { limit: PRIORITY_QUEUE_LIMIT }),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,35 +66,92 @@ export default async function DashboardPage() {
         }
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="size-4 text-muted-foreground" />
-            Equipe
-          </CardTitle>
-          <CardDescription>Pessoas com acesso a esta conta.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="divide-y">
-            {members.map((member) => (
-              <li
-                key={member.id}
-                className="flex items-center gap-3 py-2.5 text-sm"
-              >
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
-                  {getInitials(member.name) || member.email.charAt(0).toUpperCase()}
-                </div>
-                <span className="flex-1 truncate">
-                  {member.name || member.email}
-                </span>
-                <span className="text-muted-foreground">
-                  {ROLE_LABELS[member.role]}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+        <StatTile icon={Send} label="Mensagens enviadas" value={summary.messagesSent} />
+        <StatTile
+          icon={MessageSquarePlus}
+          label="Conversas iniciadas"
+          value={summary.conversationsStarted}
+        />
+        <StatTile icon={MessageSquareReply} label="Respostas" value={summary.replies} />
+        <StatTile icon={Repeat2} label="Follow-ups" value={summary.followUps} />
+        <StatTile
+          icon={CalendarClock}
+          label="Reuniões agendadas"
+          value={summary.meetingsScheduled}
+        />
+      </div>
+
+      {priorityLeads.length === 0 ? (
+        <EmptyState
+          icon={UserPlus}
+          title="Nenhum lead ativo"
+          description="Adicione seu primeiro prospecto para começar a prospectar."
+          action={
+            <Button
+              nativeButton={false}
+              render={
+                <Link href="/leads/new">
+                  <UserPlus />
+                  Adicionar Lead
+                </Link>
+              }
+            />
+          }
+        />
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Prioridades de Hoje</CardTitle>
+            <CardDescription>
+              Ordenado por Momentum — priorização por IA em breve.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Especialidade</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Momentum</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {priorityLeads.map((lead) => (
+                  <TableRow key={lead.id}>
+                    <TableCell>
+                      <Link
+                        href={`/leads/${lead.id}`}
+                        className="font-medium text-primary-strong hover:underline"
+                      >
+                        {lead.name}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {lead.niche}
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={lead.status} />
+                    </TableCell>
+                    <TableCell>
+                      <MomentumBadge momentum={lead.momentum} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+          <CardFooter>
+            <Link
+              href="/leads"
+              className="text-sm font-medium text-primary-strong hover:underline"
+            >
+              Ver todos os leads
+            </Link>
+          </CardFooter>
+        </Card>
+      )}
     </div>
   );
 }

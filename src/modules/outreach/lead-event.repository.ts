@@ -34,3 +34,20 @@ export function listEvents(scope: TenantScope, leadId: string) {
     orderBy: { createdAt: "desc" },
   });
 }
+
+/** Powers the Painel do Dia's daily counters (WORKFLOW.md §4) — events of one
+ * type (optionally narrowed to a `toStatus`, e.g. STATUS_CHANGED → REPLIED)
+ * logged within a given range. */
+export function countEventsInRange(
+  scope: TenantScope,
+  range: { start: Date; end: Date; type: LeadEventType; toStatus?: LeadStatus },
+) {
+  return db.leadEvent.count({
+    where: {
+      tenantId: scope.tenantId,
+      type: range.type,
+      ...(range.toStatus ? { toStatus: range.toStatus } : {}),
+      createdAt: { gte: range.start, lt: range.end },
+    },
+  });
+}

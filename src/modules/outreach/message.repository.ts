@@ -57,3 +57,19 @@ export async function markMessageSent(scope: TenantScope, id: string) {
     data: { status: "SENT", sentAt: new Date() },
   });
 }
+
+/** Powers the Painel do Dia's daily counters (WORKFLOW.md §4) — sent messages
+ * in a given range, optionally narrowed to one kind (e.g. FIRST_CONTACT). */
+export function countSentInRange(
+  scope: TenantScope,
+  range: { start: Date; end: Date; kind?: MessageKind },
+) {
+  return db.outboundMessage.count({
+    where: {
+      tenantId: scope.tenantId,
+      status: "SENT",
+      sentAt: { gte: range.start, lt: range.end },
+      ...(range.kind ? { kind: range.kind } : {}),
+    },
+  });
+}

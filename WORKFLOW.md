@@ -188,34 +188,41 @@ Todas essas consultas seguem o padrão já estabelecido: passam pelo serviço do
 (`outreach` para `LeadEvent`/`OutboundMessage`) via o helper de escopo de tenant — nunca uma query
 Prisma direta a partir de `app/` (ARCHITECTURE.md §3).
 
-## 5. Implicações para Implementações Futuras (não construídas neste documento)
+## 5. Implicações para Implementações Futuras
 
-Este documento é uma referência de fluxo, não uma especificação técnica pronta para codar. Ele
-implica algumas peças que **ainda não existem** e que uma implementação futura precisará endereçar
-— cada uma seguindo o processo normal de atualização de documentação do CLAUDE.md quando for
-construída:
+Este documento é uma referência de fluxo, não uma especificação técnica pronta para codar. Abaixo,
+o que já foi construído a partir dele e o que ainda falta — cada peça futura seguindo o processo
+normal de atualização de documentação do CLAUDE.md quando for construída:
 
+**Já implementado:**
+- **Painel do Dia como superfície dedicada.** `src/app/(dashboard)/page.tsx` foi redesenhado como
+  o centro operacional descrito no §3.1: contadores do dia + fila única priorizada por Momentum
+  (`getPriorityLeads` em `src/modules/outreach/momentum.service.ts`), sem o card de equipe que
+  ocupava a tela antes. É puramente composição de UI sobre serviços já existentes de `outreach`
+  (Momentum, LeadEvent, OutboundMessage) — nenhuma lógica de negócio nova, nenhuma migração.
+- **Contadores diários como consulta.** As métricas do §4 (mensagens enviadas, conversas
+  iniciadas, respostas, follow-ups, reuniões agendadas) são calculadas sob demanda em
+  `src/modules/outreach/daily-summary.service.ts`, via novas funções de contagem por intervalo em
+  `message.repository.ts`/`lead-event.repository.ts` — nenhum campo persistente novo, a fonte de
+  verdade continua sendo `LeadEvent`/`OutboundMessage`. Sem meta diária configurada, o painel
+  mostra só os contadores, sem barra de progresso (decisão validada em §7).
+
+**Ainda não construído:**
 - **Metas diárias configuráveis.** Hoje não existe onde guardar "quero enviar N mensagens por
   dia". Candidato natural: um campo novo (ex. `dailyMessageGoal` ou similar) próximo de
   `CommercialProfile` (módulo `tenancy`), já que ali vive a configuração do tenant. Isso exigiria
   uma migração aditiva e a atualização correspondente de DATA_MODEL.md **no momento em que for
   implementado** — não antes.
-- **Painel do Dia como superfície dedicada.** Hoje o dashboard (`src/app/(dashboard)/page.tsx`)
-  mostra a equipe do tenant; a evolução para mostrar metas + fila priorizada é um redesenho de UI
-  dentro do módulo `app/`, consumindo serviços já existentes de `outreach` (Momentum, LeadEvent) —
-  não deveria exigir lógica de negócio nova, apenas composição do que já existe.
 - **"Modo Foco" / fila sequencial (Fila A / Fila B do §3.2).** Hoje a UI trabalha por lista de
-  leads (`/leads`) e detalhe individual (`/leads/[id]`). Uma experiência de "um lead por vez, avança
-  automaticamente" é uma camada de UI nova sobre os mesmos dados e Quick Actions — não uma mudança
-  de modelo.
+  leads (`/leads`) e detalhe individual (`/leads/[id]`), mais a fila única de prioridade do Painel
+  do Dia (acima) — que ainda não avança automaticamente de lead em lead. Uma experiência de "um
+  lead por vez, avança automaticamente" é uma camada de UI nova sobre os mesmos dados e Quick
+  Actions — não uma mudança de modelo.
 - **Formulário de captura rápida.** Uma variante mais enxuta de `leads/new` (menos campos
   obrigatórios na hora, edição completa depois) — reaproveita `lead.service.ts`/`lead.schema.ts`
   como estão.
-- **Contadores diários como consulta, não como coluna nova.** As métricas do §4 devem ser
-  calculadas sob demanda (query agregada por dia), não armazenadas como um novo campo persistente —
-  evita duplicar a fonte de verdade que já é `LeadEvent`/`OutboundMessage`.
 
-Nenhum destes itens deve ser iniciado como código a partir deste documento sozinho — cada um
+Nenhum item pendente deve ser iniciado como código a partir deste documento sozinho — cada um
 precisa da aprovação explícita do usuário como uma tarefa própria, seguindo o fluxo de trabalho já
 estabelecido no projeto.
 

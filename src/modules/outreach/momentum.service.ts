@@ -109,3 +109,24 @@ export function sortByMomentumPriority(leads: Lead[]): Lead[] {
     return b.lastActivityAt.getTime() - a.lastActivityAt.getTime();
   });
 }
+
+/**
+ * Powers the Painel do Dia's "quem precisa de mim agora" queue (WORKFLOW.md
+ * §3.1) — rule-based today (DECISIONS.md "Why Momentum Is Rule-Based"), and
+ * the deliberate swap point for a future AI-ranked priority queue (VISION.md
+ * "Execution & Design Principles": AI woven in, not bolted on). Callers depend
+ * only on this function's shape, so replacing the ranking logic later never
+ * touches the dashboard page. Terminal leads (won/lost) never need attention.
+ */
+export async function getPriorityLeads(
+  scope: TenantScope,
+  options: { limit?: number } = {},
+): Promise<Lead[]> {
+  const leads = await prospectingService.listLeads(scope);
+  const active = leads.filter(
+    (lead) => lead.status !== "SALE_COMPLETED" && lead.status !== "LOST",
+  );
+  const fresh = await refreshLeadsMomentum(scope, active);
+  const sorted = sortByMomentumPriority(fresh);
+  return options.limit ? sorted.slice(0, options.limit) : sorted;
+}
