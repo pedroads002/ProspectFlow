@@ -9,6 +9,11 @@ Help commercial professionals spend less time operating prospecting tasks and mo
 the relationships that generate business. Every part of this document, and every decision made
 downstream of it, serves that single mission — not feature growth for its own sake.
 
+ProspectFlow's identity in one line: **not a CRM, not a chatbot, not an automation tool — a
+Commercial Operating System** for local service businesses. Every screen, feature, and interaction
+decision is filtered through that identity before anything else (see "Execution & Design
+Principles" below).
+
 ## What ProspectFlow Is
 
 ProspectFlow is an AI-driven commercial operating system for outbound prospecting, built for
@@ -90,6 +95,37 @@ ProspectFlow, regardless of how appealing it seems in isolation. This checklist 
 day-to-day enforcement mechanism for the philosophy above — it exists so scope decisions can be
 made quickly and consistently, without relitigating first principles every time.
 
+## Execution & Design Principles
+
+Core Principles (above) governs *what* gets built. This section governs *how it looks and feels*
+once built — the product's operating identity, not just its feature scope.
+
+**Always:**
+- A clean, uncluttered interface — zero visual noise. If a screen has a data point, control, or
+  label that doesn't earn its place, remove it.
+- AI assistance woven into every relevant area of the product, not bolted on as a single
+  standalone feature.
+- Fewer clicks over more options. Every interaction is measured against "could this be one click
+  instead of two?"
+- Every screen must measurably save the user time versus their previous way of working (a
+  spreadsheet, a notes app) — a screen that merely displays data without reducing effort is a
+  half-finished feature.
+- UX is prioritized over feature completeness when the two are in tension.
+
+**Never:**
+- Look or feel like a generic CRM/project-management tool — no Kommo-, Monday-, HubSpot-, or
+  Trello-style interface patterns (dense tables, kanban-everything, config-heavy setup screens).
+  ProspectFlow's UI identity is deliberately its own: built around today's priority action, not a
+  database grid.
+- Add visual complexity in the name of "power user" configurability. If a setting needs an options
+  page to explain it, it's probably the wrong default.
+
+**Mobile:** ProspectFlow's current, official execution model is **desktop-first** (see
+[DECISIONS.md](./DECISIONS.md#why-desktop-first) and [ARCHITECTURE.md](./ARCHITECTURE.md)) — this
+is unchanged by the principles above. A mobile-first experience is part of the long-term vision
+(see below) as usage patterns evolve, not a current requirement or an implicit reversal of the
+desktop-first decision.
+
 ## Long-Term Vision
 
 ProspectFlow becomes the default outbound layer for independent consultants and small commercial
@@ -108,6 +144,9 @@ Over time:
   user which handful of prospects deserve attention today, and why.
 - The platform grows from single-user to true multi-tenant SaaS, supporting small teams that share
   visibility into prospecting activity without becoming a general CRM.
+- The interface grows from desktop-first (the MVP and near-term reality — see DECISIONS.md) toward
+  a true mobile-first experience, once real usage data shows the daily triage/execution loop
+  genuinely moving onto phones — a deliberate future evolution, not a gap in the current product.
 
 **ProspectFlow is envisioned, from the start, as a platform built on specialized AI agents rather
 than a single general-purpose assistant.** Different agents are responsible for different parts of
