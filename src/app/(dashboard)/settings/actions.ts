@@ -25,6 +25,11 @@ export async function saveCommercialProfileAction(
       valueProposition: formData.get("valueProposition"),
       toneDescription: formData.get("toneDescription"),
       servicesOffered: formData.get("servicesOffered"),
+      targetAudience: formData.get("targetAudience"),
+      differentiators: formData.get("differentiators"),
+      commonObjections: formData.get("commonObjections"),
+      prohibitedTerms: formData.get("prohibitedTerms"),
+      exampleMessage: formData.get("exampleMessage"),
     });
     await upsertCommercialProfile(scope, data);
   } catch (error) {

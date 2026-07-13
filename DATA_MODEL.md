@@ -70,12 +70,25 @@ Indexes: `tenantId`; unique on `supabaseUserId` and `email`.
 | `valueProposition` | text | yes | What the user sells / area of expertise |
 | `toneDescription` | text | yes | Communication style guidance used in every AI prompt |
 | `servicesOffered` | text | no | Optional extra detail for personalization |
+| `targetAudience` | text | no | Ideal customer profile — who the user sells best to |
+| `differentiators` | text | no | What sets the user apart from competitors offering something similar |
+| `commonObjections` | text | no | Objections the user hears most, and how they prefer to respond — input for future objection-handling AI assistance |
+| `prohibitedTerms` | text | no | Words, phrases, or topics the user never wants AI drafts to use — reinforces PRD FR-2.3 (no sales-pitch phrasing) with user-specific detail |
+| `exampleMessage` | text | no | A real message from the user, used as a style anchor for future drafting |
 | `createdAt` / `updatedAt` | timestamp | yes | |
 
 Design note: modeled 1:1 with `Tenant` rather than per-`User`, because the MVP tenant is a single
 consultant. When multi-user tenants (agencies) arrive, this may need to move to per-`User` (each
 consultant has their own voice) — flagged here explicitly so it isn't a silent migration surprise
 later.
+
+Design note: the 5 fields added after `servicesOffered` (`targetAudience` through
+`exampleMessage`) exist to make `CommercialProfile` a reusable context object for every future AI
+task (follow-ups, objection handling, summaries, proposals, recommendations), filled once by the
+user — not just first-contact drafting. As of this addition, only `valueProposition` and
+`toneDescription` are actually read by the existing prompts (`draft-message.ts`, `draft-proposal.ts`,
+`analyze-conversation.ts`); wiring the new fields into those prompts is a small, separate follow-up,
+not done as part of adding the fields themselves.
 
 ### 3.4 `Lead`
 
@@ -294,6 +307,11 @@ model CommercialProfile {
   valueProposition  String
   toneDescription   String
   servicesOffered   String?
+  targetAudience    String?
+  differentiators   String?
+  commonObjections  String?
+  prohibitedTerms   String?
+  exampleMessage    String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

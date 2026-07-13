@@ -37,7 +37,7 @@ export default async function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card className="max-w-lg">
+      <Card className="max-w-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Briefcase className="size-4 text-muted-foreground" />
