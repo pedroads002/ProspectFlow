@@ -10,13 +10,33 @@ Prioritize clarity, brevity, and actionable recommendations — never long respo
 Only include an output field if it is genuinely useful for this conversation right now; omit anything that doesn't apply rather than forcing a value.
 When suggesting a next message, match the user's tone described below and keep the same rapport-first, non-salesy approach used for first contact — never write a pitch.`;
 
+function contextBlock(context: ConversationAnalysisContext): string {
+  return [
+    `Prospect: ${context.leadName} (${context.niche})`,
+    `Current stage: ${context.status}`,
+    `User's value proposition: ${context.valueProposition}`,
+    `User's tone: ${context.toneDescription}`,
+    context.differentiators
+      ? `What sets the user apart from competitors: ${context.differentiators}`
+      : null,
+    context.commonObjections
+      ? `Objections the user hears most, and how they prefer to respond: ${context.commonObjections}`
+      : null,
+    context.prohibitedTerms
+      ? `Words, phrases, or topics the user never wants used: ${context.prohibitedTerms}`
+      : null,
+    context.exampleMessage
+      ? `Example of the user's own writing style (match this voice when suggesting a next message):\n${context.exampleMessage}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 export function buildAnalysisPrompt(context: ConversationAnalysisContext) {
   return {
     system: SYSTEM,
-    prompt: `Prospect: ${context.leadName} (${context.niche})
-Current stage: ${context.status}
-User's value proposition: ${context.valueProposition}
-User's tone: ${context.toneDescription}
+    prompt: `${contextBlock(context)}
 
 Conversation so far:
 ${context.conversationText}

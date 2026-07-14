@@ -68,6 +68,10 @@ export async function analyzeConversation(scope: TenantScope, leadId: string) {
       status: lead.status,
       valueProposition: profile.valueProposition,
       toneDescription: profile.toneDescription,
+      differentiators: profile.differentiators ?? undefined,
+      commonObjections: profile.commonObjections ?? undefined,
+      prohibitedTerms: profile.prohibitedTerms ?? undefined,
+      exampleMessage: profile.exampleMessage ?? undefined,
       conversationText,
     });
   } catch {

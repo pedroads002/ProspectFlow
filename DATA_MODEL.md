@@ -72,7 +72,7 @@ Indexes: `tenantId`; unique on `supabaseUserId` and `email`.
 | `servicesOffered` | text | no | Optional extra detail for personalization |
 | `targetAudience` | text | no | Ideal customer profile — who the user sells best to |
 | `differentiators` | text | no | What sets the user apart from competitors offering something similar |
-| `commonObjections` | text | no | Objections the user hears most, and how they prefer to respond — input for future objection-handling AI assistance |
+| `commonObjections` | text | no | Objections the user hears most, and how they prefer to respond — read by conversation analysis and proposal drafting |
 | `prohibitedTerms` | text | no | Words, phrases, or topics the user never wants AI drafts to use — reinforces PRD FR-2.3 (no sales-pitch phrasing) with user-specific detail |
 | `exampleMessage` | text | no | A real message from the user, used as a style anchor for future drafting |
 | `createdAt` / `updatedAt` | timestamp | yes | |
@@ -83,12 +83,13 @@ consultant has their own voice) — flagged here explicitly so it isn't a silent
 later.
 
 Design note: the 5 fields added after `servicesOffered` (`targetAudience` through
-`exampleMessage`) exist to make `CommercialProfile` a reusable context object for every future AI
-task (follow-ups, objection handling, summaries, proposals, recommendations), filled once by the
-user — not just first-contact drafting. As of this addition, only `valueProposition` and
-`toneDescription` are actually read by the existing prompts (`draft-message.ts`, `draft-proposal.ts`,
-`analyze-conversation.ts`); wiring the new fields into those prompts is a small, separate follow-up,
-not done as part of adding the fields themselves.
+`exampleMessage`) make `CommercialProfile` a reusable context object across every AI task, filled
+once by the user. Not every field is fed to every prompt — each is included only where it serves
+that task's goal without contradicting its brevity/tone rules (PRD FR-2.3, FR-4.3/4.4): e.g.
+`differentiators` is deliberately withheld from first-contact/follow-up drafting (it risks sounding
+like a pitch, which FR-2.3 forbids at that stage) but is used for conversation analysis and proposal
+drafting, where positioning is appropriate. See `draft-message.ts`/`analyze-conversation.ts`/
+`draft-proposal.ts` in `src/modules/ai/prompts/` for the exact per-field mapping.
 
 ### 3.4 `Lead`
 

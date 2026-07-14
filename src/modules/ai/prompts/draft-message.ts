@@ -18,6 +18,13 @@ function contextBlock(context: DraftMessageContext): string {
     context.notes ? `Notes about the prospect: ${context.notes}` : null,
     `User's value proposition / expertise: ${context.valueProposition}`,
     `User's preferred communication tone: ${context.toneDescription}`,
+    context.targetAudience ? `User's ideal target audience: ${context.targetAudience}` : null,
+    context.prohibitedTerms
+      ? `Words, phrases, or topics the user never wants used: ${context.prohibitedTerms}`
+      : null,
+    context.exampleMessage
+      ? `Example of the user's own writing style (match this voice):\n${context.exampleMessage}`
+      : null,
   ]
     .filter(Boolean)
     .join("\n");

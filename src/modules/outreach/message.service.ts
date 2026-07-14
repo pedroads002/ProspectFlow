@@ -34,6 +34,9 @@ async function buildDraftContext(
     notes: lead.notes ?? undefined,
     valueProposition: profile.valueProposition,
     toneDescription: profile.toneDescription,
+    targetAudience: profile.targetAudience ?? undefined,
+    prohibitedTerms: profile.prohibitedTerms ?? undefined,
+    exampleMessage: profile.exampleMessage ?? undefined,
     priorConversation,
   };
 }

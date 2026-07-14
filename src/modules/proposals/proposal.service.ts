@@ -45,6 +45,10 @@ export async function draftProposal(
       niche: lead.niche,
       valueProposition: profile.valueProposition,
       toneDescription: profile.toneDescription,
+      targetAudience: profile.targetAudience ?? undefined,
+      differentiators: profile.differentiators ?? undefined,
+      commonObjections: profile.commonObjections ?? undefined,
+      prohibitedTerms: profile.prohibitedTerms ?? undefined,
       conversationText,
     }));
   } catch {

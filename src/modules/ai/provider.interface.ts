@@ -12,6 +12,9 @@ export type DraftMessageContext = {
   notes?: string;
   valueProposition: string;
   toneDescription: string;
+  targetAudience?: string;
+  prohibitedTerms?: string;
+  exampleMessage?: string;
   /** Prior conversation text, when drafting a follow-up (PRD FR-2.2(d)). */
   priorConversation?: string;
 };
@@ -24,6 +27,10 @@ export type ConversationAnalysisContext = {
   status: string;
   valueProposition: string;
   toneDescription: string;
+  differentiators?: string;
+  commonObjections?: string;
+  prohibitedTerms?: string;
+  exampleMessage?: string;
   conversationText: string;
 };
 
@@ -52,6 +59,10 @@ export type ProposalContext = {
   niche: string;
   valueProposition: string;
   toneDescription: string;
+  targetAudience?: string;
+  differentiators?: string;
+  commonObjections?: string;
+  prohibitedTerms?: string;
   conversationText?: string;
 };
 
