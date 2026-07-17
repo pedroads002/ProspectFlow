@@ -17,6 +17,12 @@ directly. See [ARCHITECTURE.md](../../../ARCHITECTURE.md#4-ai-architecture).
   analysis).
 - `prompts/` — prompt construction, one file per task; enforces PRD FR-2.3/FR-4.4 (rapport, not a
   pitch; brevity) at the prompt layer, not left to chance.
+- `knowledge/` — the user's sales playbook (`core-rules.md`, `playbook.md`), version-controlled
+  Markdown, not a database entity (DECISIONS.md "Why the Sales Playbook Is File-Based").
+  `knowledge.service.ts` reads and assembles it into task-relevant fragments; `prompts/*.ts` are
+  the only consumers. Edit the `.md` files directly to change what the AI's drafts/analysis are
+  grounded in — no code change needed for a content change.
 
 Requires `ANTHROPIC_API_KEY` (and optionally `ANTHROPIC_DRAFTING_MODEL`) in `.env` — see
-`.env.example`.
+`.env.example`. Also requires `src/modules/ai/knowledge/*.md` to ship in the deployed serverless
+bundle — see `outputFileTracingIncludes` in `next.config.ts`.

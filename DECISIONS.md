@@ -309,3 +309,49 @@ sounding reply that technically counts as "Replied") the way AI sentiment analys
 from `AIInteraction` history once conversation text has been analyzed — layered on top of the
 rule-based baseline, not replacing it, so Momentum still works even for leads with no pasted
 conversation text.
+
+---
+
+## Why the Sales Playbook Is File-Based, Not a Database Entity
+
+**Decision:** The user's sales methodology (opening approach, diagnosis, objection handling,
+transitions, pitch, meeting invite, follow-up cadence) lives as version-controlled Markdown in
+`src/modules/ai/knowledge/` (`core-rules.md`, `playbook.md`), read at runtime by
+`knowledge.service.ts` (ARCHITECTURE.md §4.5). It is not a new `Playbook`/`PlaybookSection`
+database entity, has no CRUD, no admin UI, and no migration.
+
+**Why:** An earlier design pass proposed a tenant-scoped database entity (multiple playbooks,
+niche tagging, per-tenant overrides) to support a future where ProspectFlow serves many tenants
+with different methodologies. The user corrected that framing: ProspectFlow is, today, a tool for
+their own single-tenant use, not a SaaS product for managing other people's playbooks — building
+multi-tenant playbook infrastructure now would be solving a problem that doesn't exist yet, against
+VISION.md's "simplicity beats unnecessary complexity, always" and "the architecture must remain
+maintainable by a solo developer." A file the developer edits directly and commits already gives
+everything the immediate need requires: a durable place to store the method, and content the AI
+prompts read as their primary source of sales strategy (as opposed to the AI inventing one).
+
+**Alternatives considered:**
+- *`Playbook`/`PlaybookSection` database entity, tenant-scoped, tagged by stage/niche* — rejected
+  for now: requires a migration, a repository, RLS policy, and (eventually) an editing surface for
+  content that today has exactly one editor (the developer) and one consumer (their own tenant).
+  Real overhead for a capability files already provide. Flagged as the natural next step *if*
+  ProspectFlow ever needs multiple playbooks (per-tenant customization, a niche marketplace) —
+  the file-based version below is designed so that migration, if it ever happens, is additive, not
+  a rewrite.
+- *Inlining playbook text directly into `prompts/*.ts`* — rejected: this is what the whole design
+  exists to avoid. Editing a sales method would become editing TypeScript, and every refinement
+  would need to be threaded through code review as if it were a logic change rather than a content
+  change.
+
+**Trade-offs accepted:** No live editing without a redeploy (edit the `.md` file, commit, `main`
+redeploys) — irrelevant in practice for a solo user, and identical in shape to how every other
+prompt change in this codebase already ships. No per-tenant customization and no database-level
+tagging by niche; both were explicitly deferred, not lost — see Future implications.
+
+**Future implications:** The file structure was chosen so a later move to a database-backed model
+doesn't require redesigning the *shape* of the knowledge, only its storage: `playbook.md`'s fixed
+`## ` headings already correspond 1:1 to the `PlaybookStage` values `knowledge.service.ts` selects
+by (`ABERTURA`, `DIAGNOSTICO`, `QUEBRA_OBJECOES`, `TRANSICAO`, `PITCH`, `CONVITE_REUNIAO`,
+`FOLLOW_UP`) — if a `PlaybookSection` table is ever built, those headings become its `stage` column
+values directly, and the selection logic in `prompts/*.ts` doesn't change, only where
+`knowledge.service.ts` reads from.

@@ -124,6 +124,31 @@ Per NFR in PRD §3, AI failures must never block the core workflow. The AI modul
 as a distinct UI state ("AI assistance unavailable — try again") while Lead management, manual
 message logging, and status updates keep working independently of AI provider uptime.
 
+### 4.5 Sales-Playbook Knowledge Assembly
+
+Beyond Commercial Profile, Lead, and conversation history, prompt construction draws on a fourth
+input: the user's own sales methodology (how to open a conversation, diagnose, handle objections,
+transition, pitch, invite to a meeting, follow up). This lives as plain Markdown in
+`src/modules/ai/knowledge/` (`core-rules.md`, `playbook.md`) — version-controlled like the rest of
+the codebase, not a database entity (see [DECISIONS.md](./DECISIONS.md#why-the-sales-playbook-is-file-based-not-a-database-entity)
+for why).
+
+`knowledge/knowledge.service.ts` is the one seam that reads these files and assembles, per AI task,
+only the fragments relevant to it — never the whole playbook in one prompt:
+- `core-rules.md` is short by convention and always included in full.
+- `playbook.md` is divided into fixed sections (`## Abertura`, `## Diagnóstico`, `## Quebra de
+  Objeções`, `## Transição`, `## Pitch`, `## Convite para Reunião`, `## Follow-up`); each
+  `prompts/*.ts` builder pulls only the stages relevant to its task (and, for conversation
+  analysis, further narrowed by the Lead's current status) — the same rule-based, explainable
+  selection philosophy already used for Momentum (§4.2's task routing is orthogonal to this: which
+  *model* answers a task is independent of which *knowledge* feeds it).
+
+This keeps the module boundary intact: `prompts/*.ts` remains the only place that shapes final
+prompt text (§2), it just now has a fourth, file-backed input alongside Commercial Profile/Lead/
+history. The product guardrails that are non-negotiable regardless of playbook content (never sound
+like a marketing agency, never send automatically — PRD FR-2.3, CLAUDE.md) stay hardcoded in the
+prompt builders themselves, not in the playbook files.
+
 ## 5. Multi-Tenant Strategy
 
 **Model: shared database, shared schema, `tenant_id` column on every tenant-scoped table.**

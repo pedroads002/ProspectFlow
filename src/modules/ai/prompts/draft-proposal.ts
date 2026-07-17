@@ -1,9 +1,16 @@
 import type { ProposalContext } from "../provider.interface";
+import { getProposalPlaybookContext } from "../knowledge/knowledge.service";
 
 /** Enforces PRD FR-5.1/FR-5.4: plain-text, conversation-grounded, no invented commitments. */
 const SYSTEM = `You help a commercial professional draft a plain-text proposal message for a prospect who is ready for one.
 Reference specifics from the conversation and the user's value proposition. Keep it concise and in the user's tone — this is still a message, not a formal document.
 Never invent pricing, scope, or commitments the user hasn't described.`;
+
+function withPlaybook(playbook: string): string {
+  return playbook
+    ? `${SYSTEM}\n\nUse the following sales method as your primary guidance for how to pitch and structure this proposal:\n\n${playbook}`
+    : SYSTEM;
+}
 
 function contextBlock(context: ProposalContext): string {
   return [
@@ -31,7 +38,7 @@ export function buildProposalPrompt(context: ProposalContext) {
     : "";
 
   return {
-    system: SYSTEM,
+    system: withPlaybook(getProposalPlaybookContext()),
     prompt: `${contextBlock(context)}
 ${conversationBlock}
 Draft a proposal message for this prospect.`,

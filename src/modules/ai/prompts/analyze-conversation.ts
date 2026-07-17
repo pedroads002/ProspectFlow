@@ -1,4 +1,5 @@
 import type { ConversationAnalysisContext } from "../provider.interface";
+import { getAnalysisPlaybookContext } from "../knowledge/knowledge.service";
 
 /**
  * Enforces PRD FR-4.2-4.4 at the prompt layer: modular (only relevant fields),
@@ -9,6 +10,12 @@ const SYSTEM = `You help a commercial professional quickly decide what to do nex
 Prioritize clarity, brevity, and actionable recommendations — never long responses.
 Only include an output field if it is genuinely useful for this conversation right now; omit anything that doesn't apply rather than forcing a value.
 When suggesting a next message, match the user's tone described below and keep the same rapport-first, non-salesy approach used for first contact — never write a pitch.`;
+
+function withPlaybook(playbook: string): string {
+  return playbook
+    ? `${SYSTEM}\n\nUse the following sales method as your primary guidance for reading this conversation and recommending what's next:\n\n${playbook}`
+    : SYSTEM;
+}
 
 function contextBlock(context: ConversationAnalysisContext): string {
   return [
@@ -35,7 +42,7 @@ function contextBlock(context: ConversationAnalysisContext): string {
 
 export function buildAnalysisPrompt(context: ConversationAnalysisContext) {
   return {
-    system: SYSTEM,
+    system: withPlaybook(getAnalysisPlaybookContext(context.status)),
     prompt: `${contextBlock(context)}
 
 Conversation so far:

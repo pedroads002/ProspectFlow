@@ -78,6 +78,10 @@ UI components:
   description, and prior conversation history when present.
 - Every prompt for an assistance/analysis task (summary, sentiment, next action) must explicitly
   instruct for brevity — a few sentences or a short list, never a long-form response.
+- The user's sales methodology (playbook) lives as Markdown in `src/modules/ai/knowledge/`, read
+  via `knowledge/knowledge.service.ts` (ARCHITECTURE.md §4.5) — it is the primary source of
+  commercial strategy for drafting/analysis prompts, selected per task by stage, never inlined into
+  a `prompts/*.ts` file and never invented by the model when a section is unfilled.
 - When adding or changing a provider, implement it in `src/modules/ai/providers/` against the
   existing `AIProvider` interface (ARCHITECTURE.md §4.1) and register it only in
   `src/modules/ai/router.ts`. Don't scatter provider selection logic elsewhere.
