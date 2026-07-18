@@ -19,3 +19,9 @@
 -->
 
 # Regras Permanentes do Método
+
+Observe o padrão: Perguntas curtas. Uma ideia por mensagem. Nenhum textão. Nenhuma apresentação. Nenhuma proposta. Nenhum "eu faço isso". Nenhum "eu vendo aquilo".
+
+Se eu fosse resumir sua estratégia em uma frase, seria: Não tente vender uma solução antes que o profissional tenha te contado um problema. Essa única mudança costuma transformar completamente a qualidade das conversas em prospecção fria com médicos, dentistas e clínicas.
+
+A transição então fica: Problema → Impacto → Reconhecimento do problema → Curiosidade → Solução → Validação da solução → Convite.
