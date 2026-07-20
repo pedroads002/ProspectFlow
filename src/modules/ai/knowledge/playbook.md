@@ -667,3 +667,197 @@ A primeira parece conversa. A segunda parece vendedor.
 E no seu caso específico, sendo uma renda extra, perfil pessoal e prospecção fria pelo Instagram, essa diferença provavelmente é responsável pela maior parte do resultado que você vai ter.
 
 ## Follow-up
+
+### Playbook de Follow-up Comercial
+### Prospecção Consultiva para Clínicas (D+2)
+
+Objetivo:
+Gerar conversa.
+Gerar autoridade.
+Fazer o profissional enxergar gargalos.
+Transformar a reunião em consequência, e não em objetivo.
+
+---
+
+D+2 | ETAPA 01
+
+Uma curiosidade...
+
+Hoje vocês conseguem saber exatamente quantos pacientes entram em contato com a clínica e quantos realmente iniciam algum tratamento?
+
+Pergunto porque essa costuma ser uma das primeiras informações que analiso quando converso com uma clínica.
+
+---
+
+D+4 | ETAPA 02
+
+Uma pergunta rápida...
+
+Na sua opinião, qual etapa costuma fazer uma clínica perder mais pacientes hoje?
+
+• Primeiro atendimento
+• Agendamento
+• Comparecimento
+• Pós-consulta
+
+Tenho achado muito interessante comparar essa percepção entre diferentes clínicas.
+
+---
+
+D+6 | ETAPA 03
+
+Uma situação que vejo praticamente todos os dias...
+
+Muitas clínicas acreditam que precisam de mais leads.
+
+Mas, quando começamos a analisar a operação, normalmente descobrimos que boa parte dos pacientes já entrou em contato alguma vez e simplesmente ficou pelo caminho.
+
+Você sente que isso acontece aí também?
+
+---
+
+D+8 | ETAPA 04
+
+Posso compartilhar uma curiosidade?
+
+Uma das perguntas que mais faço para clínicas é:
+
+"Se a secretária precisar ficar uma semana afastada, a operação comercial continua funcionando normalmente?"
+
+É impressionante como essa resposta revela muita coisa sobre a organização da clínica.
+
+---
+
+D+10 | ETAPA 05
+
+Percebi uma coisa acompanhando algumas operações.
+
+Quase sempre o problema não está na equipe.
+
+Também não está no marketing.
+
+Na maioria das vezes é simplesmente a falta de um processo claro para acompanhar cada paciente.
+
+Como funciona esse acompanhamento hoje por aí?
+
+---
+
+D+12 | ETAPA 06
+
+Uma dúvida profissional mesmo...
+
+Hoje vocês fazem algum tipo de acompanhamento dos pacientes que deixam de responder ou acabam focando apenas nos novos contatos que chegam?
+
+Pergunto porque essa costuma ser uma das maiores oportunidades de crescimento das clínicas.
+
+---
+
+D+14 | ETAPA 07
+
+Posso dividir uma percepção que tenho?
+
+Muitos gestores acompanham faturamento.
+
+Alguns acompanham quantidade de pacientes.
+
+Mas poucos conseguem responder rapidamente perguntas como:
+
+• Quantos pacientes faltaram?
+• Quantos desistiram?
+• Quantos simplesmente desapareceram?
+
+E normalmente é justamente aí que existe mais dinheiro escondido.
+
+---
+
+D+16 | ETAPA 08
+
+Curiosidade...
+
+Hoje vocês conseguem identificar facilmente de onde vêm os pacientes que mais fecham tratamento?
+
+Ou acabam olhando apenas para a quantidade de mensagens recebidas?
+
+Existe uma diferença enorme entre essas duas informações.
+
+---
+
+D+18 | ETAPA 09
+
+Uma pergunta sincera.
+
+Você acredita que hoje a clínica perde mais pacientes por falta de demanda...
+
+...ou por falta de acompanhamento?
+
+Essa resposta costuma dizer muito sobre a operação.
+
+---
+
+D+20 | ETAPA 10
+
+Uma das maiores mudanças que percebo quando uma clínica organiza melhor o comercial não é vender mais.
+
+É trabalhar com muito menos sensação de "apagando incêndio".
+
+A rotina fica muito mais previsível.
+
+Hoje vocês sentem essa correria no dia a dia?
+
+---
+
+D+22 | ETAPA 11
+
+Uma reflexão.
+
+Se eu perguntasse agora:
+
+"Quantos pacientes a clínica perdeu no último mês?"
+
+Você conseguiria responder rapidamente ou teria que procurar essa informação?
+
+Não existe resposta certa.
+
+É só uma curiosidade mesmo.
+
+---
+
+D+24 | ETAPA 12
+
+Depois de conversar com várias clínicas, comecei a perceber um padrão.
+
+Quase todas acreditavam que precisavam investir mais em marketing.
+
+Mas, antes disso, existia muito espaço para melhorar apenas organizando o processo comercial.
+
+Você também enxerga isso ou acredita que o desafio hoje seja outro?
+
+---
+
+D+26 | ETAPA 13
+
+Acho interessante como dois negócios podem receber praticamente a mesma quantidade de pacientes...
+
+...e ainda assim terem resultados completamente diferentes.
+
+Na maioria das vezes a diferença não está no marketing.
+
+Está na forma como cada oportunidade é conduzida.
+
+Como você enxerga isso na realidade da clínica?
+
+---
+
+D+28 | ETAPA 14
+
+Acho que já te fiz perguntas suficientes por aqui. 😊
+
+Mas gostei bastante da conversa e das percepções que você compartilhou ao longo desses dias.
+
+Se em algum momento fizer sentido trocar ideias sobre organização comercial, acompanhamento de pacientes, processos ou estrutura da operação, vai ser um prazer conversar com você.
+
+Sem compromisso mesmo.
+
+Se enxergar valor, ótimo.
+
+Se não fizer sentido para a realidade da clínica, pelo menos teremos uma boa troca de experiências entre profissionais da área.
